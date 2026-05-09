@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARSON</title>
+<meta name="description" content="ARSON — peaceful acts of generative, artistic terrorism.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Cormorant+SC:wght@300;400;500&family=Cormorant+Unicase:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #000;
+    --fg: #ededed;
+    --fg-dim: #888;
+    --fg-faint: #444;
+    --accent: #cfc7b6;
+    --ember: #b56b3a;
+  }
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  html, body { background: var(--bg); color: var(--fg); }
+  body {
+    font-family: 'Cormorant Garamond', 'Times New Roman', serif;
+    font-weight: 300;
+    overflow-x: hidden;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* film grain overlay */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: -10%;
+    pointer-events: none;
+    z-index: 100;
+    background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.07 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    opacity: 0.55;
+    mix-blend-mode: overlay;
+    animation: grain 1.6s steps(3) infinite;
+  }
+  @keyframes grain {
+    0% { transform: translate(0,0); }
+    33% { transform: translate(-1%, 1%); }
+    66% { transform: translate(1%, -1%); }
+    100% { transform: translate(0,0); }
+  }
+  .vignette {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 99;
+    box-shadow: inset 0 0 240px 80px rgba(0,0,0,0.85);
+  }
+
+  section {
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8vh 6vw;
+    position: relative;
+  }
+
+  /* ─── 1. HERO ─── */
+  .hero {
+    flex-direction: column;
+    text-align: center;
+  }
+  .wordmark-wrap {
+    position: relative;
+    display: inline-block;
+  }
+  .wordmark {
+    font-family: 'Cormorant Unicase', 'Cormorant Garamond', serif;
+    font-weight: 500;
+    font-size: clamp(4.2rem, 18vw, 16rem);
+    letter-spacing: 0.04em;
+    line-height: 0.95;
+    color: var(--fg);
+    text-shadow:
+      0 0 60px rgba(255,255,255,0.04),
+      0 0 120px rgba(181,107,58,0.06);
+    /* if a hand-painted wordmark image exists at images/arson-wordmark.png,
+       this rule swaps the text for it: */
+    background-image: url('images/arson-wordmark.png');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+  }
+  /* if the image fails (or hasn't been added yet), show plain text */
+  .wordmark.no-img { background-image: none !important; }
+  .scroll-cue {
+    position: absolute;
+    bottom: 4rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Cormorant SC', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.5em;
+    color: var(--fg-dim);
+    animation: pulse 4s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.25; transform: translate(-50%, 0); }
+    50%      { opacity: 0.85; transform: translate(-50%, 8px); }
+  }
+
+  /* ─── IMAGE SECTIONS ─── */
+  .image-section {
+    height: 100vh;
+    padding: 0;
+    overflow: hidden;
+  }
+  .img-frame {
+    width: 100%;
+    height: 100%;
+    background-color: #050505;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+  }
+  .img-frame[data-src="jonah-01"] { background-image: url('images/jonah-01.png'); }
+  .img-frame[data-src="jonah-02"] { background-image: url('images/jonah-02.png'); }
+  .img-frame[data-src="jonah-03"] { background-image: url('images/jonah-03.png'); }
+  .img-frame[data-src="jonah-04"] { background-image: url('images/jonah-04.png'); }
+  /* placeholder texture — only visible when no image has loaded.
+     We attach .no-photo via JS if the background-image fails. */
+  .img-frame.no-photo::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 30% 50%, rgba(60,40,30,0.55) 0%, transparent 55%),
+      radial-gradient(ellipse at 75% 35%, rgba(35,30,40,0.50) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 80%, rgba(20,15,25,0.65) 0%, transparent 70%),
+      linear-gradient(180deg, #000 0%, #0a0807 50%, #000 100%);
+    z-index: 0;
+  }
+  /* cinematic top/bottom vignette over the photo — keeps black-out edges
+     so adjacent dark sections blend seamlessly into the image */
+  .img-frame::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.55) 0%, transparent 22%, transparent 78%, rgba(0,0,0,0.65) 100%);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* ─── TAGLINE ─── */
+  .tagline-section { padding: 16vh 6vw; }
+  .tagline {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: clamp(1.4rem, 4.2vw, 3rem);
+    line-height: 1.4;
+    text-align: center;
+    max-width: 22ch;
+    color: var(--accent);
+    letter-spacing: 0.005em;
+  }
+  .tagline em {
+    font-style: normal;
+    color: var(--fg);
+    border-bottom: 1px solid var(--ember);
+    padding-bottom: 2px;
+  }
+
+  /* ─── SHOWS ─── */
+  .shows {
+    flex-direction: column;
+    text-align: center;
+    gap: 1.5rem;
+  }
+  .label {
+    font-family: 'Cormorant SC', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.55em;
+    color: var(--fg-dim);
+    text-indent: 0.55em;
+  }
+  .shows-list {
+    list-style: none;
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+    max-width: 620px;
+    width: 100%;
+  }
+  .show {
+    border-bottom: 1px solid var(--fg-faint);
+    padding-bottom: 1.4rem;
+    text-align: left;
+    display: grid;
+    grid-template-columns: 8rem 1fr;
+    gap: 1.5rem;
+    align-items: baseline;
+  }
+  .show-date {
+    font-family: 'Cormorant SC', serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.22em;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+  .show-detail { font-size: 1.15rem; }
+  .show-venue { color: var(--fg); }
+  .show-meta {
+    color: var(--fg-dim);
+    font-size: 0.95rem;
+    font-style: italic;
+    display: block;
+    margin-top: 0.3rem;
+  }
+
+  /* ─── QUOTE ─── */
+  .quote {
+    flex-direction: column;
+    max-width: 60ch;
+    gap: 1.5rem;
+    padding: 16vh 6vw;
+  }
+  .quote-block {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: clamp(1rem, 1.55vw, 1.25rem);
+    line-height: 1.75;
+  }
+  .qa { margin-bottom: 1.6rem; }
+  .qa-q {
+    color: var(--fg-dim);
+    font-style: normal;
+    margin-bottom: 0.4rem;
+  }
+  .qa-a { color: var(--accent); }
+  .qa-final .qa-a { color: var(--fg); }
+  .quote-attribution {
+    font-family: 'Cormorant SC', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.4em;
+    color: var(--fg-faint);
+    margin-top: 1.5rem;
+    align-self: center;
+  }
+
+  /* ─── MENU FOOTER ─── */
+  .menu {
+    flex-direction: column;
+    gap: 4rem;
+    padding-top: 14vh;
+    padding-bottom: 8vh;
+    min-height: 80vh;
+  }
+  .menu-buttons {
+    display: flex;
+    gap: clamp(1.5rem, 8vw, 7rem);
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .menu-btn {
+    font-family: 'Cormorant Unicase', serif;
+    font-weight: 400;
+    font-size: clamp(1.3rem, 3vw, 2.2rem);
+    letter-spacing: 0.1em;
+    color: var(--fg);
+    text-decoration: none;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0.5rem 1rem;
+    position: relative;
+    transition: color 0.4s ease, letter-spacing 0.4s ease;
+  }
+  .menu-btn::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 1px;
+    background: var(--accent);
+    transition: width 0.4s ease, left 0.4s ease;
+  }
+  .menu-btn:hover {
+    color: var(--accent);
+    letter-spacing: 0.18em;
+  }
+  .menu-btn:hover::after { width: 70%; left: 15%; }
+  .colophon {
+    font-family: 'Cormorant SC', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.45em;
+    color: var(--fg-faint);
+    text-align: center;
+  }
+
+  /* ─── REVEAL-ON-SCROLL ─── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 1.6s cubic-bezier(0.2, 0.6, 0.3, 1),
+                transform 1.6s cubic-bezier(0.2, 0.6, 0.3, 1);
+  }
+  .reveal.in { opacity: 1; transform: translateY(0); }
+
+  /* ─── MODALS ─── */
+  .modal {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: rgba(0,0,0,0.96);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 6vh 6vw;
+  }
+  .modal.open { display: flex; animation: fade 0.4s ease; }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+  .modal-inner {
+    max-width: 560px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    color: var(--fg);
+  }
+  .modal-close {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    background: none;
+    border: 1px solid var(--fg-faint);
+    color: var(--fg);
+    width: 42px;
+    height: 42px;
+    cursor: pointer;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem;
+    line-height: 1;
+    transition: border-color 0.3s, color 0.3s;
+  }
+  .modal-close:hover { border-color: var(--accent); color: var(--accent); }
+  .modal h2 {
+    font-family: 'Cormorant Unicase', serif;
+    font-weight: 400;
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    margin-bottom: 1.4rem;
+    letter-spacing: 0.06em;
+  }
+  .modal p {
+    font-size: 1.05rem;
+    margin-bottom: 1.4rem;
+    color: var(--accent);
+    font-style: italic;
+  }
+  .modal label {
+    display: block;
+    font-family: 'Cormorant SC', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.35em;
+    color: var(--fg-dim);
+    margin-bottom: 0.4rem;
+    margin-top: 0.6rem;
+  }
+  .modal input,
+  .modal textarea {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--fg-faint);
+    padding: 0.5rem 0;
+    color: var(--fg);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    margin-bottom: 1.2rem;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+  .modal input:focus, .modal textarea:focus { border-bottom-color: var(--accent); }
+  .modal textarea { resize: vertical; min-height: 110px; }
+  .modal button[type="submit"] {
+    background: none;
+    border: 1px solid var(--fg);
+    color: var(--fg);
+    padding: 0.8rem 2.4rem;
+    font-family: 'Cormorant Unicase', serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.25em;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    transition: all 0.3s;
+  }
+  .modal button[type="submit"]:hover {
+    background: var(--fg);
+    color: var(--bg);
+    letter-spacing: 0.32em;
+  }
+  .modal-list { list-style: none; }
+  .modal-list li {
+    border-bottom: 1px solid var(--fg-faint);
+    padding: 1rem 0;
+  }
+  .modal-list a {
+    color: var(--fg);
+    text-decoration: none;
+    font-size: 1.05rem;
+    transition: color 0.3s, padding-left 0.3s;
+    display: block;
+  }
+  .modal-list a:hover { color: var(--accent); padding-left: 0.5rem; }
+  .modal-list .meta {
+    display: block;
+    font-family: 'Cormorant SC', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    color: var(--fg-dim);
+    margin-top: 0.3rem;
+  }
+
+  /* ─── MOBILE ─── */
+  @media (max-width: 640px) {
+    section { padding: 6vh 7vw; }
+    .show {
+      grid-template-columns: 1fr;
+      gap: 0.4rem;
+    }
+    .menu-buttons {
+      gap: 1.6rem;
+      flex-direction: column;
+      align-items: center;
+    }
+    .scroll-cue { bottom: 2.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="vignette"></div>
+
+<!-- ── 1. HERO ── -->
+<section class="hero" id="top">
+  <div class="wordmark-wrap">
+    <h1 class="wordmark" id="wordmark">ARSON</h1>
+  </div>
+  <div class="scroll-cue">SCROLL</div>
+</section>
+
+<!-- ── 2. IMAGE — Jonah cello, low light ── -->
+<section class="image-section reveal">
+  <div class="img-frame" data-src="jonah-01" role="img" aria-label="Jonah — cello, low light"></div>
+</section>
+
+<!-- ── 3. TAGLINE ── -->
+<section class="tagline-section reveal">
+  <p class="tagline">Peaceful acts of <em>generative</em>, artistic terrorism.</p>
+</section>
+
+<!-- ── 4. IMAGE — cello, hands, feet ── -->
+<section class="image-section reveal">
+  <div class="img-frame" data-src="jonah-02" role="img" aria-label="Cello, hands, feet"></div>
+</section>
+
+<!-- ── 5. SHOWS ── -->
+<section class="shows reveal">
+  <span class="label">UPCOMING</span>
+  <ul class="shows-list">
+    <li class="show">
+      <span class="show-date">TBA · 2026</span>
+      <div class="show-detail">
+        <span class="show-venue">Date forthcoming</span>
+        <span class="show-meta">Sign up via <a href="#" data-modal="collaborate" style="color:inherit;border-bottom:1px solid var(--fg-faint);">collaborate</a> to be notified.</span>
+      </div>
+    </li>
+    <li class="show">
+      <span class="show-date">— · —</span>
+      <div class="show-detail">
+        <span class="show-venue">More to come</span>
+        <span class="show-meta">In the meantime, listen below in <a href="#" data-modal="document" style="color:inherit;border-bottom:1px solid var(--fg-faint);">document</a>.</span>
+      </div>
+    </li>
+  </ul>
+</section>
+
+<!-- ── 6. IMAGE / VIDEO LOOP — dancers in white ── -->
+<!-- VIDEO LOOP: when ready, replace this <div> with:
+     <video class="img-frame" autoplay loop muted playsinline
+            style="object-fit:cover;"
+            poster="images/dance-01.jpg">
+       <source src="images/loop.mp4" type="video/mp4">
+     </video>
+-->
+<section class="image-section reveal">
+  <div class="img-frame" data-src="jonah-03" role="img" aria-label="Dancers in white"></div>
+</section>
+
+<!-- ── 7. ALCHEMICAL QUOTE ── -->
+<section class="quote reveal">
+  <span class="label">A DIALOGUE</span>
+  <div class="quote-block">
+    <div class="qa">
+      <p class="qa-q">Q. Give a concise definition of Nature.</p>
+      <p class="qa-a">A. It is not visible, though it operates visibly; for it is simply a volatile spirit, fulfilling its office in bodies, and animated by the universal spirit—the central and universal fire, which vivifies all things that exist.</p>
+    </div>
+    <div class="qa">
+      <p class="qa-q">Q. What fire must be made use of in our work?</p>
+      <p class="qa-a">A. That fire which is used by Nature.</p>
+    </div>
+    <div class="qa">
+      <p class="qa-q">Q. Where is this fire concealed?</p>
+      <p class="qa-a">A. It is concealed in the subject of art.</p>
+    </div>
+    <div class="qa">
+      <p class="qa-q">Q. What precaution should be taken in reading the Hermetic Philosophers?</p>
+      <p class="qa-a">A. For the letter killeth, but the spirit giveth life.</p>
+    </div>
+    <div class="qa qa-final">
+      <p class="qa-q">Q. Give me the greeting to the Philosophers.</p>
+      <p class="qa-a">A. Begin; I will reply to you.</p>
+    </div>
+  </div>
+  <span class="quote-attribution">— PARACELSUS</span>
+</section>
+
+<!-- ── 8. IMAGE — cloth, night ── -->
+<section class="image-section reveal">
+  <div class="img-frame" data-src="jonah-04" role="img" aria-label="Cloth, figures, night"></div>
+</section>
+
+<!-- ── 9. MENU FOOTER ── -->
+<section class="menu reveal" id="menu">
+  <div class="menu-buttons">
+    <button class="menu-btn" data-modal="collaborate">collaborate</button>
+    <button class="menu-btn" data-modal="document">document</button>
+    <button class="menu-btn" data-modal="sense">sense</button>
+  </div>
+  <div class="colophon">ARSON · MMXXVI</div>
+</section>
+
+<!-- ── MODALS ── -->
+<div class="modal" id="modal-collaborate" role="dialog" aria-modal="true" aria-label="collaborate">
+  <button class="modal-close" aria-label="Close">×</button>
+  <div class="modal-inner">
+    <h2>collaborate</h2>
+    <p>Reach out — proposals, invitations, fellow travellers welcome.</p>
+    <form id="contact-form" onsubmit="return handleContact(event)">
+      <label for="c-name">Name</label>
+      <input id="c-name" type="text" name="name" required>
+      <label for="c-email">Email</label>
+      <input id="c-email" type="email" name="email" required>
+      <label for="c-msg">Message</label>
+      <textarea id="c-msg" name="message" required></textarea>
+      <button type="submit">SEND</button>
+    </form>
+    <p id="contact-result" style="display:none; color: var(--accent); margin-top: 1rem;"></p>
+  </div>
+</div>
+
+<div class="modal" id="modal-document" role="dialog" aria-modal="true" aria-label="document">
+  <button class="modal-close" aria-label="Close">×</button>
+  <div class="modal-inner">
+    <h2>document</h2>
+    <p>Audio &amp; visual transmissions from the work.</p>
+    <ul class="modal-list">
+      <li><a href="#">Untitled session<span class="meta">AUDIO · 2026</span></a></li>
+      <li><a href="#">Live, Olympia<span class="meta">VIDEO · 2026</span></a></li>
+      <li><a href="#">Field recording — winter<span class="meta">AUDIO · 2026</span></a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="modal" id="modal-sense" role="dialog" aria-modal="true" aria-label="sense">
+  <button class="modal-close" aria-label="Close">×</button>
+  <div class="modal-inner">
+    <h2>sense</h2>
+    <p>Press, reflections, &amp; the slow record of where we&rsquo;ve been.</p>
+    <ul class="modal-list">
+      <li><a href="#">Bio &amp; lineage<span class="meta">ABOUT</span></a></li>
+      <li><a href="#">Selected press<span class="meta">WRITING</span></a></li>
+      <li><a href="#">Past performances<span class="meta">ARCHIVE</span></a></li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  // ─── reveal-on-scroll ───
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('in');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // ─── modals ───
+  function openModal(name) {
+    const m = document.getElementById('modal-' + name);
+    if (m) m.classList.add('open');
+  }
+  function closeModal(m) {
+    m.classList.remove('open');
+  }
+  document.querySelectorAll('[data-modal]').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.preventDefault();
+      openModal(el.dataset.modal);
+    });
+  });
+  document.querySelectorAll('.modal-close').forEach(btn => {
+    btn.addEventListener('click', () => closeModal(btn.closest('.modal')));
+  });
+  document.querySelectorAll('.modal').forEach(m => {
+    m.addEventListener('click', (e) => { if (e.target === m) closeModal(m); });
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal.open').forEach(closeModal);
+    }
+  });
+
+  // ─── image-frame fallback ───
+  // If a frame's background-image doesn't load, mark it .no-photo so the
+  // placeholder gradient appears instead of an empty black panel.
+  document.querySelectorAll('.img-frame').forEach(frame => {
+    const bg = getComputedStyle(frame).backgroundImage;
+    const m = bg && bg.match(/url\(["']?([^"')]+)["']?\)/);
+    if (!m) { frame.classList.add('no-photo'); return; }
+    const test = new Image();
+    test.onerror = () => frame.classList.add('no-photo');
+    test.src = m[1];
+  });
+
+  // ─── wordmark image fallback ───
+  // If images/arson-wordmark.png doesn't exist, drop the bg-image so the
+  // text-set wordmark shows instead. Keeps this graceful before Greg's PNG arrives.
+  (function() {
+    const wm = document.getElementById('wordmark');
+    const bg = getComputedStyle(wm).backgroundImage;
+    if (!bg || bg === 'none') return;
+    const url = bg.match(/url\(["']?([^"')]+)["']?\)/);
+    if (!url) return;
+    const test = new Image();
+    test.onerror = () => wm.classList.add('no-img');
+    test.src = url[1];
+  })();
+
+  // ─── contact form (no backend yet) ───
+  function handleContact(e) {
+    e.preventDefault();
+    const result = document.getElementById('contact-result');
+    result.textContent = 'Message held. (Form not yet wired to a backend — replace handleContact() with your form action.)';
+    result.style.display = 'block';
+    return false;
+  }
+</script>
+
+</body></html>
