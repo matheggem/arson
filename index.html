@@ -72,7 +72,17 @@
   .wordmark-wrap {
     position: relative;
     display: inline-block;
+    max-width: 90vw;
   }
+  .wordmark-img {
+    display: block;
+    width: clamp(20rem, 75vw, 70rem);
+    max-width: 90vw;
+    height: auto;
+    filter: drop-shadow(0 0 40px rgba(181, 35, 35, 0.15));
+  }
+  .wordmark-img.hidden { display: none; }
+  /* text fallback — shown only when the painted image fails to load */
   .wordmark {
     font-family: 'Cormorant Unicase', 'Cormorant Garamond', serif;
     font-weight: 500;
@@ -83,15 +93,9 @@
     text-shadow:
       0 0 60px rgba(255,255,255,0.04),
       0 0 120px rgba(181,107,58,0.06);
-    /* if a hand-painted wordmark image exists at images/arson-wordmark.png,
-       this rule swaps the text for it: */
-    background-image: url('images/arson-wordmark.png');
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: contain;
+    display: none;
   }
-  /* if the image fails (or hasn't been added yet), show plain text */
-  .wordmark.no-img { background-image: none !important; }
+  .wordmark.show { display: block; }
   .scroll-cue {
     position: absolute;
     bottom: 4rem;
@@ -126,6 +130,7 @@
   .img-frame[data-src="jonah-02"] { background-image: url('images/jonah-02.png'); }
   .img-frame[data-src="jonah-03"] { background-image: url('images/jonah-03.png'); }
   .img-frame[data-src="jonah-04"] { background-image: url('images/jonah-04.png'); }
+  .img-frame[data-src="jonah-05"] { background-image: url('images/jonah-05.png'); }
   /* placeholder texture — only visible when no image has loaded.
      We attach .no-photo via JS if the background-image fails. */
   .img-frame.no-photo::before {
@@ -221,15 +226,22 @@
   /* ─── QUOTE ─── */
   .quote {
     flex-direction: column;
-    max-width: 60ch;
+    align-items: center;
+    justify-content: center;
     gap: 1.5rem;
     padding: 16vh 6vw;
+  }
+  .quote-inner {
+    max-width: 820px;
+    width: 100%;
+    margin: 0 auto;
+    text-align: left;
   }
   .quote-block {
     font-family: 'Cormorant Garamond', serif;
     font-style: italic;
     font-weight: 300;
-    font-size: clamp(1rem, 1.55vw, 1.25rem);
+    font-size: clamp(1.05rem, 1.55vw, 1.3rem);
     line-height: 1.75;
   }
   .qa { margin-bottom: 1.6rem; }
@@ -240,14 +252,34 @@
   }
   .qa-a { color: var(--accent); }
   .qa-final .qa-a { color: var(--fg); }
-  .quote-attribution {
-    font-family: 'Cormorant SC', serif;
-    font-size: 0.7rem;
-    letter-spacing: 0.4em;
+  .qa-ellipsis {
     color: var(--fg-faint);
-    margin-top: 1.5rem;
-    align-self: center;
+    text-align: center;
+    margin: 1.2rem 0 1.6rem;
+    font-style: normal;
+    letter-spacing: 0.5em;
   }
+  .quote-attribution {
+    display: block;
+    font-family: 'Cormorant Unicase', serif;
+    font-size: clamp(1.1rem, 2.4vw, 1.8rem);
+    letter-spacing: 0.35em;
+    color: var(--fg);
+    margin: 3rem 0 0.8rem;
+    text-align: center;
+  }
+  .quote-citation {
+    display: block;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: var(--fg-dim);
+    max-width: 540px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .quote-citation em { color: var(--accent); font-style: italic; }
 
   /* ─── MENU FOOTER ─── */
   .menu {
@@ -445,7 +477,8 @@
 <!-- ── 1. HERO ── -->
 <section class="hero" id="top">
   <div class="wordmark-wrap">
-    <h1 class="wordmark" id="wordmark">ARSON</h1>
+    <img class="wordmark-img" id="wordmark-img" src="images/arson-wordmark.png" alt="ARSON">
+    <h1 class="wordmark" id="wordmark-text">ARSON</h1>
   </div>
   <div class="scroll-cue">SCROLL</div>
 </section>
@@ -457,7 +490,7 @@
 
 <!-- ── 3. TAGLINE ── -->
 <section class="tagline-section reveal">
-  <p class="tagline">Peaceful acts of <em>generative</em>, artistic terrorism.</p>
+  <p class="tagline"><em>Generative</em> acts of artistic terrorism.</p>
 </section>
 
 <!-- ── 4. IMAGE — cello, hands, feet ── -->
@@ -470,17 +503,10 @@
   <span class="label">UPCOMING</span>
   <ul class="shows-list">
     <li class="show">
-      <span class="show-date">TBA · 2026</span>
+      <span class="show-date">19 · JUNE · 2026</span>
       <div class="show-detail">
-        <span class="show-venue">Date forthcoming</span>
-        <span class="show-meta">Sign up via <a href="#" data-modal="collaborate" style="color:inherit;border-bottom:1px solid var(--fg-faint);">collaborate</a> to be notified.</span>
-      </div>
-    </li>
-    <li class="show">
-      <span class="show-date">— · —</span>
-      <div class="show-detail">
-        <span class="show-venue">More to come</span>
-        <span class="show-meta">In the meantime, listen below in <a href="#" data-modal="document" style="color:inherit;border-bottom:1px solid var(--fg-faint);">document</a>.</span>
+        <span class="show-venue">Moon Room</span>
+        <span class="show-meta">Olympia, Washington</span>
       </div>
     </li>
   </ul>
@@ -501,32 +527,87 @@
 <!-- ── 7. ALCHEMICAL QUOTE ── -->
 <section class="quote reveal">
   <span class="label">A DIALOGUE</span>
-  <div class="quote-block">
-    <div class="qa">
-      <p class="qa-q">Q. Give a concise definition of Nature.</p>
-      <p class="qa-a">A. It is not visible, though it operates visibly; for it is simply a volatile spirit, fulfilling its office in bodies, and animated by the universal spirit—the central and universal fire, which vivifies all things that exist.</p>
+  <div class="quote-inner">
+    <div class="quote-block">
+      <div class="qa">
+        <p class="qa-q">Q. What is the chief study of a Philosopher?</p>
+        <p class="qa-a">A. It is the investigation of the operations of Nature.</p>
+      </div>
+      <p class="qa-ellipsis">…</p>
+      <div class="qa">
+        <p class="qa-q">Q. Give a concise definition of Nature.</p>
+        <p class="qa-a">A. It is not visible, though it operates visibly; for it is simply a volatile spirit, fulfilling its office in bodies, and animated by the universal spirit—the divine breath, the central and universal fire, which vivifies all things that exist.</p>
+      </div>
+      <div class="qa">
+        <p class="qa-q">Q. What should be the qualities possessed by the examiners of Nature?</p>
+        <p class="qa-a">A. They should be like Nature unto herself. That is to say, they should be truthful, simple, patient, and persevering.</p>
+      </div>
+      <div class="qa">
+        <p class="qa-q">Q. What matters should subsequently engross their attention?</p>
+        <p class="qa-a">A. The philosophers should most carefully ascertain whether their designs are in harmony with Nature, and of a possible and attainable kind; if they would accomplish by their own power anything that is usually performed by the power of Nature, they must imitate her in every detail.</p>
+      </div>
+      <p class="qa-ellipsis">…</p>
+      <div class="qa">
+        <p class="qa-q">Q. What should receive the most careful attention of the Philosopher?</p>
+        <p class="qa-a">A. Assuredly, the end of Nature, and this is by no means to be looked for in the vulgar metals…</p>
+      </div>
+      <div class="qa">
+        <p class="qa-q">Q. For what precise reason?</p>
+        <p class="qa-a">A. Because the vulgar metals, and chiefly gold, are absolutely dead, while ours, on the contrary, are absolutely living, and possess a soul.</p>
+      </div>
+      <div class="qa">
+        <p class="qa-q">Q. What is the life of metals?</p>
+        <p class="qa-a">A. It is no other substance than fire…</p>
+      </div>
+      <div class="qa">
+        <p class="qa-q">Q. What is their death?</p>
+        <p class="qa-a">A. Their life and death are in reality one principle, for they die, as they live, by fire, but their death is from a fire of fusion.</p>
+      </div>
+      <p class="qa-ellipsis">…</p>
+      <div class="qa">
+        <p class="qa-q">Q. How many operations are comprised in our work?</p>
+        <p class="qa-a">A. There is one only, which may be resolved into sublimation, and sublimation, according to Gerber, is nothing other than the elevation of the dry matter by the mediation of fire, with adherence to its own vase.</p>
+      </div>
+      <div class="qa">
+        <p class="qa-q">Q. What precaution should be taken in reading the Hermetic Philosophers?</p>
+        <p class="qa-a">A. Great care, above all, must be observed upon this point, lest what they say upon the subject should be interpreted literally and in accordance with the mere sound of the words: For the letter killeth, but the spirit giveth life.</p>
+      </div>
+      <p class="qa-ellipsis">…</p>
+      <div class="qa">
+        <p class="qa-q">Q. What fire must be made use of in our work?</p>
+        <p class="qa-a">A. That fire which is used by Nature.</p>
+      </div>
+      <p class="qa-ellipsis">…</p>
+      <div class="qa">
+        <p class="qa-q">Q. Where is this fire concealed?</p>
+        <p class="qa-a">A. It is concealed in the subject of art.</p>
+      </div>
+      <p class="qa-ellipsis">…</p>
+      <div class="qa">
+        <p class="qa-q">Q. Is everything contained in this subject?</p>
+        <p class="qa-a">A. Yes; but Nature, at the same time, must be assisted, so that the work may be perfected…</p>
+      </div>
+      <div class="qa">
+        <p class="qa-q">Q. Is this subject exceedingly precious?</p>
+        <p class="qa-a">A. It is vile, and originally is without native elegance…</p>
+      </div>
+      <p class="qa-ellipsis">…</p>
+      <div class="qa qa-final">
+        <p class="qa-q">Q. Give me the greeting to the Philosophers.</p>
+        <p class="qa-a">A. Begin; I will reply to you.</p>
+      </div>
     </div>
-    <div class="qa">
-      <p class="qa-q">Q. What fire must be made use of in our work?</p>
-      <p class="qa-a">A. That fire which is used by Nature.</p>
-    </div>
-    <div class="qa">
-      <p class="qa-q">Q. Where is this fire concealed?</p>
-      <p class="qa-a">A. It is concealed in the subject of art.</p>
-    </div>
-    <div class="qa">
-      <p class="qa-q">Q. What precaution should be taken in reading the Hermetic Philosophers?</p>
-      <p class="qa-a">A. For the letter killeth, but the spirit giveth life.</p>
-    </div>
-    <div class="qa qa-final">
-      <p class="qa-q">Q. Give me the greeting to the Philosophers.</p>
-      <p class="qa-a">A. Begin; I will reply to you.</p>
-    </div>
+    <span class="quote-attribution">— PARACELSUS</span>
+    <span class="quote-citation">The Hermetic &amp; Alchemical Writings of Aureolus Phillipus Theophrastus Bombast of Hohennheim, called <em>Paracelsus The Great</em>, translated &amp; edited by Arthur Edward White (1976).</span>
   </div>
-  <span class="quote-attribution">— PARACELSUS</span>
 </section>
 
-<!-- ── 8. IMAGE — cloth, night ── -->
+<!-- ── 8. IMAGE — hands/cloth (response to the dialogue) ── -->
+<section class="image-section reveal">
+  <div class="img-frame" data-src="jonah-05" role="img" aria-label="Hands and cloth"></div>
+</section>
+
+<!-- ── 9. IMAGE — cloth, night ── -->
 <section class="image-section reveal">
   <div class="img-frame" data-src="jonah-04" role="img" aria-label="Cloth, figures, night"></div>
 </section>
@@ -637,17 +718,21 @@
   });
 
   // ─── wordmark image fallback ───
-  // If images/arson-wordmark.png doesn't exist, drop the bg-image so the
-  // text-set wordmark shows instead. Keeps this graceful before Greg's PNG arrives.
+  // If images/arson-wordmark.png doesn't exist, hide the <img> and show the
+  // text wordmark instead. Keeps this graceful before the painted PNG arrives.
   (function() {
-    const wm = document.getElementById('wordmark');
-    const bg = getComputedStyle(wm).backgroundImage;
-    if (!bg || bg === 'none') return;
-    const url = bg.match(/url\(["']?([^"')]+)["']?\)/);
-    if (!url) return;
-    const test = new Image();
-    test.onerror = () => wm.classList.add('no-img');
-    test.src = url[1];
+    const img = document.getElementById('wordmark-img');
+    const txt = document.getElementById('wordmark-text');
+    if (!img || !txt) return;
+    img.addEventListener('error', () => {
+      img.classList.add('hidden');
+      txt.classList.add('show');
+    });
+    // also check natural dimensions in case the image is already broken
+    if (img.complete && (img.naturalWidth === 0 || img.naturalHeight === 0)) {
+      img.classList.add('hidden');
+      txt.classList.add('show');
+    }
   })();
 
   // ─── contact form (no backend yet) ───
