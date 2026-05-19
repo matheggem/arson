@@ -126,11 +126,11 @@
     background-position: center;
     position: relative;
   }
-  .img-frame[data-src="jonah-01"] { background-image: url('images/jonah-01.png'); }
-  .img-frame[data-src="jonah-02"] { background-image: url('images/jonah-02.png'); }
-  .img-frame[data-src="jonah-03"] { background-image: url('images/jonah-03.png'); }
-  .img-frame[data-src="jonah-04"] { background-image: url('images/jonah-04.png'); }
-  .img-frame[data-src="jonah-05"] { background-image: url('images/jonah-05.png'); }
+  .img-frame[data-src="jonah-01"] { background-image: url('images/jonah-01.jpg'); }
+  .img-frame[data-src="jonah-02"] { background-image: url('images/jonah-02.jpg'); }
+  .img-frame[data-src="jonah-03"] { background-image: url('images/jonah-03.jpg'); }
+  .img-frame[data-src="jonah-04"] { background-image: url('images/jonah-04.jpg'); }
+  .img-frame[data-src="jonah-05"] { background-image: url('images/jonah-05.jpg'); }
   /* placeholder texture — only visible when no image has loaded.
      We attach .no-photo via JS if the background-image fails. */
   .img-frame.no-photo::before {
@@ -612,7 +612,8 @@
   <div class="img-frame" data-src="jonah-04" role="img" aria-label="Cloth, figures, night"></div>
 </section>
 
-<!-- ── 9. MENU FOOTER ── -->
+<!-- footer commented out to hide it from rendering; restore by removing the wrapping comment -->
+<!-- ── 9. MENU FOOTER ──
 <section class="menu reveal" id="menu">
   <div class="menu-buttons">
     <button class="menu-btn" data-modal="collaborate">collaborate</button>
@@ -621,6 +622,7 @@
   </div>
   <div class="colophon">ARSON · MMXXVI</div>
 </section>
+-->
 
 <!-- ── MODALS ── -->
 <div class="modal" id="modal-collaborate" role="dialog" aria-modal="true" aria-label="collaborate">
